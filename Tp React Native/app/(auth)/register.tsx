@@ -58,17 +58,15 @@ import { Text, View, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityInd
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { auth } from "@/config/firebase";
-import { Link, useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-const  RegisterScreen = () => {
-   const router = useRouter();
+export default function Register() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [pays, setPays] = useState("");
   const [departement, setDepartement] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
- const [secureText, setSecureText] = useState(true);
 
   const handleRegister = async () => {
     if (!email || !password || !name || !pays || !departement) {
@@ -88,7 +86,6 @@ const  RegisterScreen = () => {
   };
 
   return (
-    
     <View style={styles.container}>
       <Text style={styles.title}>Inscription</Text>
 
@@ -141,34 +138,46 @@ const  RegisterScreen = () => {
       </Link>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'f4f4f4',
+    backgroundColor: '#25292e',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: "#f4f4f4",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
   },
   input: {
-    marginBottom: 10,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  passwordInput: {
-    flex: 1,
+    width: '100%',
+    height: 50,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
   },
   button: {
-    marginTop: 20,
-    backgroundColor: "#0b03fc",
+    backgroundColor: '#1DB954',
+    paddingVertical: 15,
+    borderRadius: 10,
+    width: '100%',
+    alignItems: 'center',
   },
-  link : {
-    color : "#303bc0"
-  }
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  link: {
+    marginTop: 15,
+    color: '#1DB954',
+    fontSize: 16,
+    textDecorationLine: 'underline',
+  },
 });
-
-export default RegisterScreen
