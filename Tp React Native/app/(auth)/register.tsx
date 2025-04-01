@@ -16,7 +16,7 @@
 //         Alert.alert("Erreur", "Veuillez remplir tous les champs.");
 //         return;
 //       }
-  
+
 //       setLoading(true);
 //       try {
 //         await createUserWithEmailAndPassword(auth, email, password);
@@ -62,11 +62,14 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function Register() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [pays, setPays] = useState("");
+  const [departement, setDepartement] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!email || !password) {
+    if (!email || !password || !name || !pays || !departement) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
@@ -75,7 +78,7 @@ export default function Register() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       Alert.alert("Succès", "Inscription réussie !");
-      router.replace("/dashboard"); 
+      router.replace("/(app)");
     } catch (error: any) {
       Alert.alert("Erreur", error.message);
     }
@@ -94,6 +97,27 @@ export default function Register() {
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Nom de famille"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Pays"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        onChangeText={setPays}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Departement"
+        placeholderTextColor="#888"
+        autoCapitalize="none"
+        onChangeText={setDepartement}
       />
 
       <TextInput
@@ -119,7 +143,7 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
+    backgroundColor: 'f4f4f4',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,

@@ -39,7 +39,7 @@ const Tickets = () => {
   return (
     <>
       <TicketList
-        tickets={yourTicketsData} // Replace with your actual data
+        tickets={yourTicketsData}
         onTicketPress={handleTicketPress}
         onAddTicket={handleAddTicket}
       />
@@ -48,7 +48,6 @@ const Tickets = () => {
         onClose={onModalClose}
         onSave={handleAddTicket}
       />
-      <Link href="/dashboard">Go to dashboard \(from index\)</Link>
     </>
   );
 };

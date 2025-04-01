@@ -31,9 +31,6 @@ messagingSenderId: isEasBuild
 appId: isEasBuild
   ? process.env.FIREBASE_APP_ID
   : process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-  measurementId: isEasBuild
-  ? process.env.FIREBASE_MEASUREMENT_ID
-  :process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase

@@ -1,16 +1,14 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
- import { Link, Redirect, useRootNavigationState, useRouter } from 'expo-router'; 
+import { Link, Redirect, useRootNavigationState, useRouter } from 'expo-router';
 import { useAuth } from '@/context/ctx';
 import { getAuth } from 'firebase/auth';
 import Button from '@/components/ui/Button';
+import { TextInput, IconButton, Button as Bt } from "react-native-paper";
 
 export default function Index() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const goTodashboard = () => {
-    router.replace("/dashboard");
-  }
 
   if (!user)
     return <Redirect href="/login" />
@@ -20,19 +18,17 @@ export default function Index() {
 
     auth.signOut();
   }
+  const goToTicketsIndex = () => {
+    router.replace("/tickets");
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>index Screen</Text>
-      <Link href="/login" style={styles.button}>
-       C'est mon index ouuuuuu
-      </Link>
+      <Text>Bienvenue {user.email}</Text>
+      <Bt mode="contained" onPress={goToTicketsIndex}>Liste de tickets </Bt>
       <Pressable onPress={signOut}>
-        <Text style={{color:'#fff'}}>
-          Se déconnecter
-        </Text>
+        <Bt mode="text" onPress={signOut}>Se déconnecter</Bt>
       </Pressable>
-        <Button label="go dashboard" onPress={goTodashboard}/>
     </View>
   );
 }
@@ -40,13 +36,11 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
+    backgroundColor: '#fafafa',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {
-    color: '#fff',
-  },
+
   button: {
     fontSize: 20,
     textDecorationLine: 'underline',
