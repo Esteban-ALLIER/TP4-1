@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
+    backgroundColor: "#0b03fc",
   },
 });
 

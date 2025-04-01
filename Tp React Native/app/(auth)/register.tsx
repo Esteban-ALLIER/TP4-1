@@ -58,15 +58,17 @@ import { Text, View, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityInd
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { auth } from "@/config/firebase";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Link, useRouter } from "expo-router";
 
-export default function Register() {
+const  RegisterScreen = () => {
+   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [pays, setPays] = useState("");
   const [departement, setDepartement] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+ const [secureText, setSecureText] = useState(true);
 
   const handleRegister = async () => {
     if (!email || !password || !name || !pays || !departement) {
@@ -86,6 +88,7 @@ export default function Register() {
   };
 
   return (
+    
     <View style={styles.container}>
       <Text style={styles.title}>Inscription</Text>
 
@@ -138,7 +141,7 @@ export default function Register() {
       </Link>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -147,37 +150,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
+    backgroundColor: "#f4f4f4",
   },
   input: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    marginBottom: 10,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  passwordInput: {
+    flex: 1,
   },
   button: {
-    backgroundColor: '#1DB954',
-    paddingVertical: 15,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: "#0b03fc",
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  link: {
-    marginTop: 15,
-    color: '#1DB954',
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
+  link : {
+    color : "#303bc0"
+  }
 });
+
+export default RegisterScreen
