@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,34 +6,24 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 
-// Interface for the Ticket as provided
+
 interface Ticket {
   name: string;
   status: string;
   priority: string;
 }
 
-// Props interface for the TicketList component
+
 interface TicketListProps {
   tickets: Ticket[];
   onTicketPress?: (ticket: Ticket) => void;
   onAddTicket?: () => void;
+  onTicketRefresh?: () => void;
 }
-
-// Mock data (you mentioned you'll handle data fetching)
-const mockTickets: Ticket[] = [
-  { name: "Fix login screen bug", status: "Open", priority: "High" },
-  {
-    name: "Update user profile page",
-    status: "In Progress",
-    priority: "Medium",
-  },
-  { name: "Implement dark mode", status: "Open", priority: "Low" },
-  { name: "Add payment integration", status: "Closed", priority: "High" },
-  { name: "Optimize image loading", status: "In Progress", priority: "Medium" },
-];
 
 // Helper function to get color based on priority
 const getPriorityColor = (priority: string): string => {
@@ -64,10 +54,69 @@ const getStatusColor = (status: string): string => {
 };
 
 const TicketList: React.FC<TicketListProps> = ({
-  tickets = mockTickets,
+  tickets,
   onTicketPress,
   onAddTicket,
+  onTicketRefresh,
 }) => {
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [paginatedTickets, setPaginatedTickets] = useState<Ticket[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    paginateData();
+  }, [tickets, currentPage]);
+
+  const paginateData = () => {
+    const start = currentPage * itemsPerPage;
+    const end = start + itemsPerPage;
+    setPaginatedTickets(tickets.slice(start, end));
+    setTotalPages(Math.ceil(tickets.length / itemsPerPage));
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const renderPaginationButtons = () => {
+    const maxButtonsToShow = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxButtonsToShow / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxButtonsToShow - 1);
+  
+    if (endPage - startPage + 1 < maxButtonsToShow) {
+      startPage = Math.max(0, endPage - maxButtonsToShow + 1);
+    }
+  
+    const buttons = [];
+  
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <TouchableOpacity
+          key={i}
+          onPress={() => handlePageClick(i)}
+          style={[
+            styles.paginationButton,
+            i === currentPage && styles.activeButton,
+          ]}
+        >
+          <Text style={styles.buttonText}>{i + 1}</Text>
+        </TouchableOpacity>
+      );
+    }
+    return <View style={styles.paginationContainer}>{buttons}</View>;
+
+  }
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    onTicketRefresh?.();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
+  
   const renderTicketItem = ({ item }: { item: Ticket }) => {
     return (
       <TouchableOpacity
@@ -106,15 +155,24 @@ const TicketList: React.FC<TicketListProps> = ({
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
-
+     
+    <View style={styles.flatListView}>
       <FlatList
-        data={tickets}
+        data={paginatedTickets}
         renderItem={renderTicketItem}
         keyExtractor={(item, index) => `ticket-${index}`}
         contentContainerStyle={styles.listContent}
+        ListEmptyComponent={() => (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#2196F3" />
+          </View>
+        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       />
-
+      {renderPaginationButtons()}
+  </View>
       {/* Floating Add Button */}
       <TouchableOpacity
         style={styles.floatingButton}
@@ -125,8 +183,7 @@ const TicketList: React.FC<TicketListProps> = ({
       </TouchableOpacity>
     </View>
   );
-};
-
+  }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -218,6 +275,38 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
+  },
+   flatListView: {
+    flex: 1, 
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  paginationButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginHorizontal: 4,
+    backgroundColor: 'gray',
+  },
+  activeButton: {
+    backgroundColor: '#22c55d',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  buttonText: {
+    color: 'white',
   },
 });
 

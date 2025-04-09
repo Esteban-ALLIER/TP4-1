@@ -1,35 +1,40 @@
 import AddTicketForm from "@/components/tickets/TicketForm";
 import TicketList from "@/components/tickets/TicketCard";
-import { getAllTickets, getTicketsDB, Ticket } from "@/services/ticket.service";
+import { createTicket, getAllTickets, Ticket } from "@/services/ticket.service";
 import { useEffect, useState } from "react";
-import {Link} from "expo-router"
+import { useRouter } from "expo-router";
+import { Button, RefreshControl, SafeAreaView, ScrollView } from "react-native";
+import React from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
 const Tickets = () => {
+  const router = useRouter();
   const ticketsData: Ticket[] = [];
   const [yourTicketsData, setYourTicketsData] = useState<Ticket[]>(ticketsData);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
+  const getTickets = async () => {
+    const tickets = await getAllTickets();
+    setYourTicketsData(tickets);
+  };
+
   useEffect(() => {
-    const getTickets = async () => {
-      const tickets = await getAllTickets();
-      console.log("Tickets:", tickets);
-      //getTicketsDB();
-      setYourTicketsData(tickets);
-    };
-    getTickets();
+    getTickets(); 
   }, []);
 
-  const handleTicketPress = (ticket: Ticket) => {
-    console.log("Ticket pressed:", ticket);
-    // Navigate to ticket details or perform other actions
+  const handleTicketPress = async (ticket: Ticket) => {
+    getTickets();
+    router.push(`/tickets/${ticket.idTicket?.toString()}`);	
   };
 
-  const handleAddTicket = () => {
-    console.log("Add ticket button pressed");
+  const handleAddTicketList = () => {
     setIsModalVisible(true);
   };
 
-  const onAddSticker = () => {
-    setIsModalVisible(true);
+  const handleAddTicket = async (ticket: Ticket) => {
+    await createTicket({ nameTicket: ticket.name, priorityTicket: ticket.priority, statusTicket: ticket.status });
+    getTickets();
+    setIsModalVisible(false)
   };
 
   const onModalClose = () => {
@@ -37,19 +42,19 @@ const Tickets = () => {
   };
 
   return (
-    <>
-      <TicketList
-        tickets={yourTicketsData}
-        onTicketPress={handleTicketPress}
-        onAddTicket={handleAddTicket}
-      />
+
+      <><TicketList
+      tickets={yourTicketsData}
+      onTicketRefresh={getTickets}
+      onTicketPress={handleTicketPress}
+      onAddTicket={handleAddTicketList} />
       <AddTicketForm
         visible={isModalVisible}
         onClose={onModalClose}
-        onSave={handleAddTicket}
-      />
-    </>
+        onSave={handleAddTicket} /></>
+
   );
 };
+
 
 export default Tickets;

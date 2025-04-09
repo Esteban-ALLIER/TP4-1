@@ -1,82 +1,43 @@
-// import { Text, View, StyleSheet, Alert } from 'react-native';
-//  import { Link, router } from 'expo-router'; 
-// import { useState } from 'react';
-// import { useAuth } from '@/context/ctx';
-// import { auth } from "@/config/firebase";
-// import { createUserWithEmailAndPassword } from 'firebase/auth';
-
-// export default function Register() {
-
-//   const [email,setEmail] = useState(null);
-//   const [password,setPassword] = useState(null)
-//   const [loading, setLoading] = useState(false);
-
-//     const handleRegister = async () => {
-//       if (!email || !password) {
-//         Alert.alert("Erreur", "Veuillez remplir tous les champs.");
-//         return;
-//       }
-
-//       setLoading(true);
-//       try {
-//         await createUserWithEmailAndPassword(auth, email, password);
-//         Alert.alert("Succès", "Inscription réussie !");
-//         router.replace("/login")
-//         // Redirection ou mise à jour de l'état après inscription
-//       } catch (error) {
-//         Alert.alert("Erreur", (error as Error).message);
-//       }
-//       setLoading(false);
-//     };
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.text}>Register Screen</Text>
-//       <Link href="/login" style={styles.button}>
-//         Already have an account. Go to Login Screen
-//       </Link>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#25292e',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   text: {
-//     color: '#000000',
-//   },
-//   button: {
-//     fontSize: 20,
-//     textDecorationLine: 'underline',
-//     color: '#fff',
-//   },
-// });
-import { Text, View, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, View, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { auth } from "@/config/firebase";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { IconButton, TextInput, Button as Bt } from "react-native-paper";
+import { db } from '@/config/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function Register() {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [pays, setPays] = useState("");
+  const [fullName, setName] = useState("");
   const [departement, setDepartement] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [secureText, setSecureText] = useState(true);
+  const GoToLogin = () => {
+    router.push("/(auth)/login");
+  }
   const handleRegister = async () => {
-    if (!email || !password || !name || !pays || !departement) {
+    if (!email || !password || !fullName || !departement) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user
+      const userId = user.uid;
+
+      await setDoc(doc(db, "Users", user.uid), {
+        email: email,
+        fullName: fullName,
+        departement: departement,
+        role: "employee",
+        createdAt: new Date(),
+        lastLogin: new Date(),
+        userId: user.uid
+      });
       Alert.alert("Succès", "Inscription réussie !");
       router.replace("/(app)");
     } catch (error: any) {
@@ -87,55 +48,48 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Inscription</Text>
+      <Text style={styles.text}>Inscription</Text>
 
       <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
-        keyboardType="email-address"
-        autoCapitalize="none"
+        label="Adresse e-mail"
         value={email}
         onChangeText={setEmail}
+        mode="outlined"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Nom de famille"
-        placeholderTextColor="#888"
-        autoCapitalize="none"
+        label="Nom de famille"
+        value={fullName}
         onChangeText={setName}
+        mode="outlined"
+        autoCapitalize="none"
+        style={styles.input}
       />
       <TextInput
         style={styles.input}
-        placeholder="Pays"
-        placeholderTextColor="#888"
+        label="Departement"
         autoCapitalize="none"
-        onChangeText={setPays}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Departement"
-        placeholderTextColor="#888"
-        autoCapitalize="none"
+        mode="outlined"
+        value={departement}
         onChangeText={setDepartement}
       />
-
       <TextInput
-        style={styles.input}
-        placeholder="Mot de passe"
-        placeholderTextColor="#888"
-        secureTextEntry
+        label="Mot de passe"
         value={password}
         onChangeText={setPassword}
+        mode="outlined"
+        autoCapitalize="none"
       />
-
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>S'inscrire</Text>}
-      </TouchableOpacity>
-
-      <Link href="/login" style={styles.link}>
-        Déjà un compte ? Connectez-vous
-      </Link>
+      <Bt
+        mode="contained"
+        loading={loading}
+        disabled={loading}
+        onPress={handleRegister}
+        style={styles.button}
+      >S'enregistrer</Bt>
+      <Bt mode="text" onPress={GoToLogin}>déjà un compte ? connectez-vous</Bt>
     </View>
   );
 }
@@ -143,41 +97,23 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
+    backgroundColor: "#f4f4f4",
   },
   input: {
-    width: '100%',
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    marginBottom: 10,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   button: {
-    backgroundColor: '#1DB954',
-    paddingVertical: 15,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
+    marginTop: 20,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  link: {
-    marginTop: 15,
-    color: '#1DB954',
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
+  text: {
+    color: "#000",
+    fontSize: 24,
+    textAlign: "center",
+  }
 });

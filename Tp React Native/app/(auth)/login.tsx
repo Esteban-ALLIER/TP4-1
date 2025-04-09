@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, IconButton,Button as Bt } from "react-native-paper";
+import { TextInput, IconButton, Button as Bt } from "react-native-paper";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { Link, useRouter } from "expo-router";
 import Button from "@/components/ui/Button";
-import {router} from 'expo-router'
+import { router } from 'expo-router'
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +25,7 @@ const LoginScreen = () => {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
-    else{
+    else {
       goTodashboard();
     }
 
@@ -33,7 +33,7 @@ const LoginScreen = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Succès", "Connexion réussie !");
-      router.replace("/(app)"); 
+      router.replace("/(app)");
       // Redirection ou mise à jour de l'état après connexion
     } catch (error) {
       Alert.alert("Erreur", (error as Error).message);
@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#0b03fc",
   },
 });
 

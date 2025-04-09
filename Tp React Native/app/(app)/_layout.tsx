@@ -3,18 +3,22 @@ import { Redirect, Stack, Tabs } from 'expo-router';
 import { useAuth } from '@/context/ctx';
 import React from 'react';
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 
 
 
 export default function TabLayout() {
   const { user, loading } = useAuth();
 
+
   if (!user)
     return <Redirect href="/login" />
+
   return (
 
     <Tabs>
-      <Tabs.Screen name="tickets/index" options={{
+      <Tabs.Screen name="tickets" options={{
         title: "Tickets",
         tabBarIcon: ({ color, focused }) => (
           <Ionicons
@@ -52,4 +56,5 @@ export default function TabLayout() {
       }} />
     </Tabs>
   )
+
 }

@@ -9,7 +9,6 @@ export default function Index() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-
   if (!user)
     return <Redirect href="/login" />
 
