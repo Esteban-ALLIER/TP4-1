@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/ctx";
-import { TicketFirst } from "@/types/ticket";
+import { User } from "@/types/user";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -12,89 +12,58 @@ import {
   RefreshControl,
 } from "react-native";
 
-
-
-interface TicketListProps {
-  tickets: TicketFirst[];
-  onTicketPress?: (ticket: TicketFirst) => void;
-  onAddTicket?: () => void;
-  onTicketRefresh?: () => void;
+interface UserListProps {
+  user: User[];
+  onUserPress?: (user: User) => void;
+  onUserRefresh?: () => void;
 }
-
-// Helper function to get color based on priority
-const getPriorityColor = (priority: string): string => {
-  switch (priority.toLowerCase()) {
-    case "critique":
-      return "#880808";
-    case "élevé":
-      return "#FF5252";
-    case "moyen":
-      return "#FFD740";
-    case "bas":
+// Helper function to get color based on role
+const getRoleColor = (Role: string): string => {
+  switch (Role.toLowerCase()) {
+    case "support":
+      return "#ff7800";
+    case "employee":
       return "#4CAF50";
-      
+    case "admin":
+      return "#FF5252";
     default:
       return "#9E9E9E";
   }
 };
-
-// Helper function to get color based on status
-const getStatusColor = (status: string): string => {
-  switch (status.toLowerCase()) {
-    
-    case "nouveau":
-      return "#2196F3";
-    case "résolu":
-      return "#38d541"
-    case "assigné":
-      return "#FFEB3B";
-    case "en cours":
-      return "#FF9800";
-    case "fermé":
-      return "#dfe8e9";
-    default:
-      return "#9E9E9E";
-  }
-};
-
-const TicketList: React.FC<TicketListProps> = ({
-  tickets,
-  onTicketPress,
-  onAddTicket,
-  onTicketRefresh,
+export const UserList: React.FC<UserListProps> = ({
+  user,
+  onUserPress,
+  onUserRefresh,
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedTickets, setPaginatedTickets] = useState<TicketFirst[]>([]);
+  const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const itemsPerPage = 4;
-  const {user, role}= useAuth()
+  const itemsPerPage = 3;
+  const { user: userAuth, role } = useAuth()
   useEffect(() => {
     paginateData();
-  }, [tickets, currentPage]);
+  }, [user, currentPage]);
 
   const paginateData = () => {
     const start = currentPage * itemsPerPage;
     const end = start + itemsPerPage;
-    setPaginatedTickets(tickets.slice(start, end));
-    setTotalPages(Math.ceil(tickets.length / itemsPerPage));
+    setPaginatedUsers(user.slice(start, end));
+    setTotalPages(Math.ceil(user.length / itemsPerPage));
   };
 
   const handlePageClick = (page: number) => {
     setCurrentPage(page);
   };
-
   const renderPaginationButtons = () => {
     const maxButtonsToShow = 5;
     let startPage = Math.max(0, currentPage - Math.floor(maxButtonsToShow / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxButtonsToShow - 1);
-  
+
     if (endPage - startPage + 1 < maxButtonsToShow) {
       startPage = Math.max(0, endPage - maxButtonsToShow + 1);
-    }
-  
-    const buttons = [];
-  
+    } const buttons = [];
+
     for (let i = startPage; i <= endPage; i++) {
       buttons.push(
         <TouchableOpacity
@@ -112,36 +81,34 @@ const TicketList: React.FC<TicketListProps> = ({
     return <View style={styles.paginationContainer}>{buttons}</View>;
 
   }
-
   const handleRefresh = () => {
     setRefreshing(true);
-    onTicketRefresh?.();
+    onUserRefresh?.();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
   };
-  
-  const renderTicketItem = ({ item }: { item: TicketFirst }) => {
-    return (
-      <TouchableOpacity
-        style={styles.ticketItem}
-        onPress={() => onTicketPress && onTicketPress(item)}
-      >
-        <View style={styles.ticketContent}>
-          <Text style={styles.ticketName}>{item.title}</Text>
 
-          <View style={styles.ticketDetails}>
+  const renderUserItem = ({ item }: { item: User }) => {
+    return (
+      <TouchableOpacity style={styles.userItem}
+        onPress={() => onUserPress && onUserPress(item)}
+      >
+        <View style={styles.userContent}>
+          <Text style={styles.userName}>{item.fullName}</Text>
+
+          <View style={styles.userDetails}>
             <View style={styles.infoContainer}>
               <View
                 style={[
-                  styles.statusIndicator,
-                  { backgroundColor: getStatusColor(item.status) },
+                  styles.roleIndicator,
+                  { backgroundColor: getRoleColor(item.role) },
                 ]}
               />
-              <Text style={styles.statusText}>{item.status}</Text>
+              <Text style={styles.roleText}>{item.role === "employee" ? "employé" : item.role}</Text>
             </View>
 
-            <View style={styles.infoContainer}>
+            {/* <View style={styles.infoContainer}>
               <View
                 style={[
                   styles.priorityDot,
@@ -149,46 +116,37 @@ const TicketList: React.FC<TicketListProps> = ({
                 ]}
               />
               <Text style={styles.priorityText}>{item.priority}</Text>
-            </View>
+            </View> */}
           </View>
         </View>
       </TouchableOpacity>
     );
   };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-     
-    <View style={styles.flatListView}>
-      <FlatList
-        data={paginatedTickets}
-        renderItem={renderTicketItem}
-        keyExtractor={(item, index) => `ticket-${index}`}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={() => (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#2196F3" />
-          </View>
-        )}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      />
-      {renderPaginationButtons()}
-  </View>
-      {role === "employee" && 
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={onAddTicket}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.floatingButtonText}>+</Text>
-      </TouchableOpacity>
-}
+      <View style={styles.flatListView}>
+        <FlatList
+          data={paginatedUsers}
+          renderItem={renderUserItem}
+          keyExtractor={(item, index) => `user-${index}`}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={() => (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2196F3" />
+            </View>
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        />
+        {renderPaginationButtons()}
+      </View>
     </View>
   );
-  }
+}
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -210,7 +168,7 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 16,
   },
-  ticketItem: {
+  userItem: {
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     marginBottom: 12,
@@ -221,16 +179,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  ticketContent: {
+  userContent: {
     flex: 1,
   },
-  ticketName: {
+  userName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#212121",
     marginBottom: 12,
   },
-  ticketDetails: {
+  userDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -238,13 +196,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  statusIndicator: {
+  roleIndicator: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginRight: 6,
   },
-  statusText: {
+  roleText: {
     fontSize: 14,
     color: "#616161",
   },
@@ -281,8 +239,8 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
-   flatListView: {
-    flex: 1, 
+  flatListView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -314,5 +272,3 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
-
-export default TicketList;

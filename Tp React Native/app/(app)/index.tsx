@@ -12,6 +12,9 @@ export default function Index() {
   const router = useRouter();
   const [ticketCount, setTicketCount] = useState(0);
   const [loadingTickets, setLoadingTickets] = useState(true);
+  const handleOpenList = () => {
+    router.push(`/profile/utilisateurs`);
+  }
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -23,17 +26,17 @@ export default function Index() {
           let userTickets = [];
           if (role === "employee") {
             // Tickets cree par l'employee
-            userTickets = tickets.filter(ticket => 
+            userTickets = tickets.filter(ticket =>
               ticket.createdBy?.id === user?.uid
             );
           } else if (role === "support") {
             // Tickets assigne au support
-            userTickets = tickets.filter(ticket => 
+            userTickets = tickets.filter(ticket =>
               ticket.assignedTo?.id === user?.uid
             );
           } else if (role === "admin") {
             userTickets = tickets;
-          }         
+          }
           setTicketCount(userTickets.length);
         } catch (error) {
           console.error("Erreur lors de la récupération des tickets:", error);
@@ -53,7 +56,8 @@ export default function Index() {
     const auth = getAuth();
     auth.signOut();
   }
-  
+
+
   const goToTicketsIndex = () => {
     router.replace("/tickets");
   }
@@ -62,24 +66,34 @@ export default function Index() {
     <View style={styles.container}>
       <Text >Bienvenue</Text>
       <Text style={styles.welcome}>{user?.email}</Text>
-      <Text style={styles.roleText}>Vous êtes connecté en tant que {role}</Text>
-      
+      <Text style={styles.roleText}>Vous êtes connecté en tant que {role === "employee" ? "employé" : role}</Text>
+
       {loadingTickets ? (
         <ActivityIndicator size="small" color="#0066CC" />
       ) : (
         <>
           {role === "admin" && (
-            <Text style={styles.label}>Vous avez {ticketCount} tickets en cours</Text>
+            <Text style={styles.label}>Vous avez {ticketCount} ticket(s) en cours</Text>
           )}
           {role === "support" && (
-            <Text style={styles.label}>Vous avez {ticketCount} tickets qui vous sont assignés</Text>
+            <Text style={styles.label}>Vous avez {ticketCount} ticket(s) qui vous est assigné</Text>
           )}
           {role === "employee" && (
-            <Text style={styles.label}>Vous avez {ticketCount} tickets</Text>
+            <Text style={styles.label}>Vous avez {ticketCount} ticket(s)</Text>
           )}
         </>
       )}
-      
+      {role === "admin" && (
+        <Bt
+          mode="contained"
+          onPress={handleOpenList}
+          style={styles.actionButton}
+          icon="account-group"
+        >
+          Gérer les utilisateurs
+        </Bt>
+      )}
+
       <Bt mode="text" onPress={signOut} style={styles.logoutButton}>
         Se déconnecter
       </Bt>

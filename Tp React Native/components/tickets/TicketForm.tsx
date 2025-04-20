@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import * as Location from "expo-location";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { useAuth } from "@/context/ctx"; // Ajout du contexte d'authentification
 
 // Props pour le formulaire
 interface AddTicketFormProps {
@@ -31,14 +32,17 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
   onSave,
   initialTicket,
 }) => {
-  // État initial du ticket
+  // Récupération du rôle de l'utilisateur
+  const { role } = useAuth();
+  const isSupport = role === "support" || role === "admin";
+  
   const [ticket, setTicket] = useState<TicketFirst>
     ({
       title: "",
       description: "",
       status: "nouveau",
-      priority: "medium",
-      category: "hardware",
+      priority: "moyen",
+      category: "matériel",
     });
   const [typeForm, setTypeForm] = useState<string>("")
 
@@ -50,12 +54,10 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
       setTypeForm("add")
     }
   }, [initialTicket]);
-  // Options disponibles
-  const statusOptions = ["new", "assigned", "in-progress", "resolved", "closed"];
-  const priorityOptions = ["low", "medium", "high", "critical"];
-  const categoryOPtions = ["hardware", "software", "network", "access", "other"]
+  const statusOptions = ["nouveau", "assigné", "en cours", "résolu", "fermé"];
+  const priorityOptions = ["bas", "moyen", "élevé", "critique"];
+  const categoryOPtions = ["matériel", "logiciel", "réseau", "accès", "autre"]
 
-  // Gestion des erreurs
   const [nameError, setNameError] = useState("");
 
   // Validation du formulaire
@@ -83,8 +85,8 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
         title: "",
         description: "",
         status: "nouveau",
-        priority: "medium",
-        category: "hardware",
+        priority: "moyen",
+        category: "matériel",
       });
       onClose();
     }
@@ -206,14 +208,15 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
                     <Text style={styles.errorText}>{nameError}</Text>
                   ) : null}
                 </View>
-                {/* if role = "support" return */}
-                {/* ******************************************************************************************************************************************* */}
-                {typeForm !== "edit" && (
+                
+                {/* Afficher le statut uniquement pour le support en mode édition */}
+                {isSupport && typeForm === "edit" && (
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Statut</Text>
                     {renderOptions(statusOptions, ticket.status, "status")}
                   </View>
                 )}
+                
                 {typeForm !== "edit" && (
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Priorité</Text>
@@ -231,15 +234,15 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
                 {typeForm == "add" && (
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Localisation</Text>
-                    <TouchableOpacity onPress={detectLocation} style={styles.detectButton}>
-                      <Ionicons name="earth-outline" size={16}></Ionicons>
-                      <Text style={styles.detectButtonText}>Détecter la position</Text>
-                    </TouchableOpacity>
                     {ticket.location && (
                       <Text style={styles.locationText}>
                         Position détectée : {ticket.location}
                       </Text>
                     )}
+                    <TouchableOpacity onPress={detectLocation} style={styles.detectButton}>
+                      <Ionicons name="earth-outline" size={16}></Ionicons>
+                      <Text style={styles.detectButtonText}>Détecter la position</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
               </ScrollView>

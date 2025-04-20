@@ -10,6 +10,7 @@ import AddCommentModal from "@/components/comments/commentsForm";
 import { useAuth } from "@/context/ctx";
 import { addComment, listenToComments } from "@/services/comment.service";
 import { comments } from "@/types/comments";
+// import { sendPushNotification } from "@/services/pushNotifications"; 
 
 const TicketDetails = () => {
   const router = useRouter();
@@ -145,6 +146,7 @@ const TicketDetails = () => {
         userId: user.uid,
         content: text,
       });
+      
       Alert.alert("Succès", "Commentaire ajouté");
     } catch (error) {
       console.error("Erreur lors de l'ajout du commentaire :", error);
@@ -217,7 +219,7 @@ const TicketDetails = () => {
 
             {ticket.dueDate && (
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Échéance</Text>
+                <Text style={styles.metaLabel}>A répondre avant le </Text>
                 <Text style={styles.metaValue}>{ticket.dueDate.toDate().toLocaleDateString('fr-FR')}</Text>
               </View>
             )}
@@ -247,13 +249,13 @@ const TicketDetails = () => {
             />
           )}
 
-          {role === "support" && (
+          
             <RNButton
               title="Ajouter un commentaire"
               onPress={() => setCommentModalVisible(true)}
               color="#0066CC"
             />
-          )}
+          
 
           {hasComments && (
             <RNButton

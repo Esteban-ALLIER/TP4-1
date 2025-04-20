@@ -25,17 +25,17 @@ const Tickets = () => {
 
   if (!user) return <Redirect href="/login" />;
   const priorityMap = new Map<string, number>([
-    ["critical", 1],
-    ["high", 2],
-    ["medium", 3],
-    ["low", 4],
+    ["critique", 1],
+    ["élevé", 2],
+    ["moyen", 3],
+    ["bas", 4],
   ]);
   const statusMap = new Map<string, number>([
-    ["new", 1],
-    ["assigned", 2],
-    ["in-progress", 3],
-    ["resolved", 4],
-    ["closed", 5],
+    ["nouveau", 1],
+    ["assigné", 2],
+    ["en cours", 3],
+    ["résolu", 4],
+    ["fermé", 5],
   ]);
   const getTickets = async () => {
     const tickets = await getAllTickets();

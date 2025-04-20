@@ -43,7 +43,7 @@ export default function Profile() {
 
             <View style={styles.infoBox}>
                 <Text style={styles.label}>Rôle:</Text>
-                <Text style={styles.value}>{userData.role}</Text>
+                <Text style={styles.value}>{userData.role === "employee" ? "employé" : role}</Text>
             </View>
             
             <View style={styles.infoBox}>
