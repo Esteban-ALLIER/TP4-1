@@ -1,3 +1,5 @@
+import { useAuth } from "@/context/ctx";
+import { TicketFirst } from "@/types/ticket";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -11,16 +13,10 @@ import {
 } from "react-native";
 
 
-interface Ticket {
-  name: string;
-  status: string;
-  priority: string;
-}
-
 
 interface TicketListProps {
-  tickets: Ticket[];
-  onTicketPress?: (ticket: Ticket) => void;
+  tickets: TicketFirst[];
+  onTicketPress?: (ticket: TicketFirst) => void;
   onAddTicket?: () => void;
   onTicketRefresh?: () => void;
 }
@@ -28,12 +24,15 @@ interface TicketListProps {
 // Helper function to get color based on priority
 const getPriorityColor = (priority: string): string => {
   switch (priority.toLowerCase()) {
+    case "critical":
+      return "#880808";
     case "high":
       return "#FF5252";
     case "medium":
       return "#FFD740";
     case "low":
       return "#4CAF50";
+      
     default:
       return "#9E9E9E";
   }
@@ -42,12 +41,15 @@ const getPriorityColor = (priority: string): string => {
 // Helper function to get color based on status
 const getStatusColor = (status: string): string => {
   switch (status.toLowerCase()) {
-    case "open":
+    
+    case "new":
       return "#2196F3";
-    case "in progress":
+    case "resolved":
+      return "#38d541"
+    case "in-progress":
       return "#FF9800";
     case "closed":
-      return "#9E9E9E";
+      return "#dfe8e9";
     default:
       return "#9E9E9E";
   }
@@ -61,10 +63,10 @@ const TicketList: React.FC<TicketListProps> = ({
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [paginatedTickets, setPaginatedTickets] = useState<Ticket[]>([]);
+  const [paginatedTickets, setPaginatedTickets] = useState<TicketFirst[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const itemsPerPage = 4;
-
+  const {user, role}= useAuth()
   useEffect(() => {
     paginateData();
   }, [tickets, currentPage]);
@@ -117,14 +119,14 @@ const TicketList: React.FC<TicketListProps> = ({
     }, 2000);
   };
   
-  const renderTicketItem = ({ item }: { item: Ticket }) => {
+  const renderTicketItem = ({ item }: { item: TicketFirst }) => {
     return (
       <TouchableOpacity
         style={styles.ticketItem}
         onPress={() => onTicketPress && onTicketPress(item)}
       >
         <View style={styles.ticketContent}>
-          <Text style={styles.ticketName}>{item.name}</Text>
+          <Text style={styles.ticketName}>{item.title}</Text>
 
           <View style={styles.ticketDetails}>
             <View style={styles.infoContainer}>
@@ -173,7 +175,7 @@ const TicketList: React.FC<TicketListProps> = ({
       />
       {renderPaginationButtons()}
   </View>
-      {/* Floating Add Button */}
+      {role === "employee" && 
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={onAddTicket}
@@ -181,6 +183,7 @@ const TicketList: React.FC<TicketListProps> = ({
       >
         <Text style={styles.floatingButtonText}>+</Text>
       </TouchableOpacity>
+}
     </View>
   );
   }
@@ -300,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'gray',
   },
   activeButton: {
-    backgroundColor: '#22c55d',
+    backgroundColor: '#330e8a',
     width: 50,
     height: 50,
     borderRadius: 25,

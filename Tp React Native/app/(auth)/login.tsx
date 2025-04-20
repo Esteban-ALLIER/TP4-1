@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import { TextInput, IconButton, Button as Bt } from "react-native-paper";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/config/firebase";
 import { Link, useRouter } from "expo-router";
 import Button from "@/components/ui/Button";
-import { router } from 'expo-router'
+import { doc, Timestamp, updateDoc } from "firebase/firestore";
 
 const LoginScreen = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
@@ -17,23 +18,24 @@ const LoginScreen = () => {
   const goToRegister = () => {
     router.push("/(auth)/register");
   }
-  const goTodashboard = () => {
-    router.replace("/(app)");
-  }
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
-    else {
-      goTodashboard();
-    }
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      const userRef = doc(db, "Users", user.uid);
+      await updateDoc(userRef, {
+        lastLogin: Timestamp.now(),
+      });
       Alert.alert("Succès", "Connexion réussie !");
-      router.replace("/(app)");
+      router.replace("/(app)")
       // Redirection ou mise à jour de l'état après connexion
     } catch (error) {
       Alert.alert("Erreur", (error as Error).message);
@@ -43,6 +45,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
+
       <TextInput
         label="Adresse e-mail"
         value={email}
@@ -78,8 +81,12 @@ const LoginScreen = () => {
       >
         Se connecter
       </Bt>
-      <Bt mode="text" onPress={goToRegister}>Créer un compte</Bt>
-
+      <Bt
+        mode="contained"
+        onPress={goToRegister}
+        style={styles.button}>
+        Inscription
+      </Bt>
     </View>
   );
 };

@@ -10,19 +10,39 @@ type Props = {
 export default function Button({ label, theme, onPress }: Props) {
   if (theme === 'edit') {
     return (
-      <View style={[styles.buttonContainer, styles.editButton]}>
-        <Pressable style={styles.buttonMain} onPress={onPress}>
-          <Ionicons size={24} name='create-outline'></Ionicons>
-          <Text style={styles.buttonLabel}>{label}</Text>
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#2980b9' : '#3498db',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='create-outline' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
         </Pressable>
       </View>
     );
   } else if (theme === 'delete') {
     return (
-      <View style={[styles.buttonContainer, styles.deleteButton]}>
-        <Pressable style={styles.buttonMain} onPress={onPress}>
-          <Ionicons size={24} name='trash-outline'></Ionicons>
-          <Text style={styles.buttonLabel}>{label}</Text>
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#c0392b' : '#e74c3c',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='trash-outline' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
         </Pressable>
       </View>
     );
@@ -91,18 +111,32 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     height: 68,
-    marginHorizontal: 10, 
+    marginHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 3,
-    flex: 1, 
+    flex: 1,
   },
   editButton: {
     borderWidth: 2,
-    borderColor: 'yellow',
   },
   deleteButton: {
     borderWidth: 2,
-    borderColor: 'red',
+  },
+  modernButton: {
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    height: 48,
+  },
+  modernButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+    marginLeft: 8,
   },
 });
