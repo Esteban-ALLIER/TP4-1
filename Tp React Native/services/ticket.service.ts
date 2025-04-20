@@ -1,3 +1,4 @@
+import { notifyLocal } from "@/components/notification/localNotification";
 import { db } from "@/config/firebase";
 import { TicketFirst, TicketTrue } from "@/types/ticket";
 import { dateOnly } from "@/utils/dateFormatter";
@@ -171,6 +172,7 @@ const updateTicket = async (
   const ticketRef = doc(db, "Tickets", ticketId);
   const supportRef = doc(db, "Users", supportUserId);
   await updateDoc(ticketRef, { assignedTo: supportRef });
+  await notifyLocal(ticketId);
 };
 
 export { getAllTickets, getTicketsDB, createTicket, getDetailTicket,deleteTicket,updateTicket,assignSupportToTicket,listenToTickets };

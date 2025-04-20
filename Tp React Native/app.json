@@ -16,13 +16,14 @@
     },
     "android": {
       "permissions": [
-        "ACCESS-FINE-LOCATION"
+        "ACCESS-FINE-LOCATION",
+        "NOTIFICATIONS"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.goyef.ticketapp"
+      "package": "com.esteban.ticketapp"
     },
     "web": {
       "bundler": "metro",
@@ -52,6 +53,6 @@
         "projectId": "4968711b-731b-4dd0-b195-aa9dd7cf6a94"
       }
     },
-    "owner": "goyef"
+    "owner": "esteban"
   }
 }

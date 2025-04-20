@@ -79,7 +79,13 @@ const UserProfile = () => {
     };
 
     const confirmRoleChange = async () => {
-        if (selectedUser) {
+        if (selectedUser && selectedUser.role !== "admin")
+            // Alert.alert(
+            //     "Erreur",
+            //     "Vous ne pouvez pas changer le rôle d'un administrateur.",
+            //     [{ text: "OK" }]
+            // );
+        {
             try {
                 await updateUser(selectedUser.userId);
                 console.log("Utilisateur mis à jour avec succès");
