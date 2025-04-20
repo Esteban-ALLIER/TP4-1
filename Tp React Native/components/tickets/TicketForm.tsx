@@ -76,7 +76,6 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
 
   // Soumission du formulaire
   const handleSubmit = () => {
-    console.log("testTicketSTP", ticket)
 
     if (validateForm()) {
       onSave(ticket);

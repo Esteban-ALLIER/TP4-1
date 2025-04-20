@@ -38,7 +38,6 @@ const Tickets = () => {
   ]);
   const getTickets = async () => {
     const tickets = await getAllTickets();
-    console.log("le nombre de ticket", filteredTickets);
     let filtered = tickets;
 
     if (role === "employee") {

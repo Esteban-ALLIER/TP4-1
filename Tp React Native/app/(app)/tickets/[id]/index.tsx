@@ -104,7 +104,6 @@ const TicketDetails = () => {
             const updated = await getDetailTicket(idTicket) as TicketFirst;
             if (updated) {
               setTicket(updated);
-              console.log("Ticket mis à jour avec succès:", updated);
             }
             setIsEditModalVisible(false);
           },

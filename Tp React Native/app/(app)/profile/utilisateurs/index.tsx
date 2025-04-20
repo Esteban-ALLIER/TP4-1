@@ -51,7 +51,6 @@ const UserProfile = () => {
                 } as User;
             });
 
-            console.log("Tous les utilisateurs récupérés:", users.length);
             return users;
         } catch (error) {
             console.error("Erreur lors de la récupération des utilisateurs:", error);
@@ -74,21 +73,34 @@ const UserProfile = () => {
     }, []);
 
     const handleUserPress = async (userToUpdate: User) => {
+        // Vérifier si l'utilisateur est un admin avant de montrer le modal
+        if (userToUpdate.role === "admin") {
+            Alert.alert(
+                "Action non autorisée",
+                "Vous ne pouvez pas changer le rôle d'un administrateur.",
+                [{ text: "OK" }]
+            );
+            return;
+        }
+
         setSelectedUser(userToUpdate);
         setModalVisible(true);
     };
 
     const confirmRoleChange = async () => {
-        if (selectedUser && selectedUser.role !== "admin")
-            // Alert.alert(
-            //     "Erreur",
-            //     "Vous ne pouvez pas changer le rôle d'un administrateur.",
-            //     [{ text: "OK" }]
-            // );
-        {
+        if (selectedUser) {
+            if (selectedUser.role === "admin") {
+                Alert.alert(
+                    "Action non autorisée",
+                    "Vous ne pouvez pas changer le rôle d'un administrateur.",
+                    [{ text: "OK" }]
+                );
+                setModalVisible(false);
+                return;
+            }
+
             try {
                 await updateUser(selectedUser.userId);
-                console.log("Utilisateur mis à jour avec succès");
                 setModalVisible(false);
                 getUsers();
                 Alert.alert(

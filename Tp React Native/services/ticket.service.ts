@@ -49,11 +49,9 @@ const listenToTickets = (
 };
 
 async function getTicketsDB() {
-  console.log("Getting tickets from DB");
 
   const querySnapshot = await getDocs(collection(db, "Tickets"));
   querySnapshot.forEach((doc) => {
-    console.log(`${doc.id} => ${doc.data()}`);
   });
 }
 
