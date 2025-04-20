@@ -4,7 +4,7 @@ export interface TicketTrue {
     id?: string;
     title: string;
     description: string;
-    status: 'nouveau' | 'assigné' | 'en cours' | 'résolu' | 'fermé';
+    status: 'nouveau' | 'assigné' | 'en cours' | 'fermé';
     priority: 'bas' | 'moyen' | 'élevé' | 'critique';
     category: 'matériel' | 'logiciel' | 'réseau' | 'accès' | 'autre';
     createdBy: DocumentReference;
@@ -24,7 +24,7 @@ export interface TicketTrue {
     id?:string,
     title: string;
     description: string;
-    status: 'nouveau' | 'assigné' | 'en cours' | 'résolu' | 'fermé';
+    status: 'nouveau' | 'assigné' | 'en cours' | 'fermé';
     priority: 'bas' | 'moyen' | 'élevé' | 'critique';
     category: 'matériel' | 'logiciel' | 'réseau' | 'accès' | 'autre';
     createdBy?: string| DocumentReference;

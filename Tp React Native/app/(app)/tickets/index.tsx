@@ -34,8 +34,7 @@ const Tickets = () => {
     ["nouveau", 1],
     ["assigné", 2],
     ["en cours", 3],
-    ["résolu", 4],
-    ["fermé", 5],
+    ["fermé", 4],
   ]);
   const getTickets = async () => {
     const tickets = await getAllTickets();

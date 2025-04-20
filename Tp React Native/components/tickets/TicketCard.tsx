@@ -44,8 +44,6 @@ const getStatusColor = (status: string): string => {
     
     case "nouveau":
       return "#2196F3";
-    case "résolu":
-      return "#38d541"
     case "assigné":
       return "#FFEB3B";
     case "en cours":
