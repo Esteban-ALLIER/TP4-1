@@ -1,9 +1,9 @@
 import { View, Text, FlatList, Pressable, StyleSheet, Alert } from "react-native";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import {  listenToSupportUsers } from "@/services/user.service"; // ta fonction corrigée plus haut
+import {  listenToSupportUsers } from "@/services/user.service"; 
 import { User } from "@/types/user";
-import { assignSupportToTicket } from "@/services/ticket.service"; // à créer si nécessaire
+import { assignSupportToTicket } from "@/services/ticket.service"; 
 
 const AssignSupportScreen = () => {
   const { id } = useLocalSearchParams();

@@ -34,8 +34,8 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
 }) => {
   // Récupération du rôle de l'utilisateur
   const { role } = useAuth();
-  const isSupport = role === "support" || role === "admin";
-  
+  const isEmployee = role === "employee"
+
   const [ticket, setTicket] = useState<TicketFirst>
     ({
       title: "",
@@ -114,8 +114,6 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
     selectedValue: string,
     field: "status" | "priority" | "category"
   ) => {
-    const isEditMode = typeForm === "edit";
-    const isStatusField = field === "status";
     return (
       <View style={styles.optionsContainer}>
         {options.map((option) => (
@@ -126,11 +124,9 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
               ticket[field] === option && styles.selectedOption,
             ]}
             onPress={() => {
-              if (isStatusField || !isEditMode) {
-                setTicket({ ...ticket, [field]: option });
-              }
+              setTicket({ ...ticket, [field]: option });
             }}
-            disabled={isEditMode && field !== "status"}
+            disabled={ticket.status === "fermé"}
           >
             <Text
               style={[
@@ -173,16 +169,17 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
                   <TextInput
                     style={[styles.input,
                     nameError ? styles.inputError : null,
-                    typeForm === "edit" && { backgroundColor: "#EDEDED", color: "#999" },]}
+                    ]}
                     value={ticket.title}
                     onChangeText={(text) => {
-                      if (typeForm !== "edit") {
+                      if (isEmployee && ticket.status !== "fermé") {
                         setTicket({ ...ticket, title: text });
                         if (text.trim()) setNameError("");
                       }
                     }}
                     placeholder="Titre du ticket..."
                     placeholderTextColor="#A0A0A0"
+
                   />
                   {nameError ? (
                     <Text style={styles.errorText}>{nameError}</Text>
@@ -192,10 +189,10 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
                   <TextInput
                     style={[styles.input,
                     nameError ? styles.inputError : null,
-                    typeForm === "edit" && { backgroundColor: "#EDEDED", color: "#999" },]}
+                    ]}
                     value={ticket.description}
                     onChangeText={(text) => {
-                      if (typeForm !== "edit") {
+                      if (isEmployee && ticket.status !== "fermé") {
                         setTicket({ ...ticket, description: text });
                         if (text.trim()) setNameError("");
                       }
@@ -207,30 +204,26 @@ const AddTicketForm: React.FC<AddTicketFormProps> = ({
                     <Text style={styles.errorText}>{nameError}</Text>
                   ) : null}
                 </View>
-                
+
                 {/* Afficher le statut uniquement pour le support en mode édition */}
-                {isSupport && typeForm === "edit" && (
+                {!isEmployee && typeForm === "edit" && ticket.status !== "fermé" && (
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Statut</Text>
                     {renderOptions(statusOptions, ticket.status, "status")}
                   </View>
                 )}
-                
-                {typeForm !== "edit" && (
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Priorité</Text>
-                    {renderOptions(priorityOptions, ticket.priority, "priority")}
-                  </View>
-                )}
 
-                {typeForm !== "edit" && (
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Catégorie</Text>
-                    {renderOptions(categoryOPtions, ticket.category, "category")}
-                  </View>
-                )}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Priorité</Text>
+                  {renderOptions(priorityOptions, ticket.priority, "priority")}
+                </View>
 
-                {typeForm == "add" && (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Catégorie</Text>
+                  {renderOptions(categoryOPtions, ticket.category, "category")}
+                </View>
+
+                {typeForm == "add" && ticket.status !== "fermé" && (
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Localisation</Text>
                     {ticket.location && (

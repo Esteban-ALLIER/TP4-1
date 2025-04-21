@@ -47,6 +47,106 @@ export default function Button({ label, theme, onPress }: Props) {
       </View>
     );
   }
+  else if (theme === 'add') {
+    return (
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#2980b9' : '#3498db',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='add-outline' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  else if (theme === 'close') {
+    return (
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#c0392b' : '#e74c3c',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='close-outline' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  else if (theme === 'return') {
+    return (
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#2980b9' : '#3498db',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='arrow-back' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  else if (theme === 'see') {
+    return (
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#2980b9' : '#3498db',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Ionicons size={20} name='eye' color="#fff"></Ionicons>
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  else if (theme === 'basique') {
+    return (
+      <View style={[styles.buttonContainer]}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.buttonMain,
+            styles.modernButton,
+            {
+              backgroundColor: pressed ? '#2980b9' : '#3498db',
+              shadowOpacity: pressed ? 0.1 : 0.3
+            }
+          ]}
+          onPress={onPress}
+        >
+          <Text style={[styles.buttonLabel, styles.modernButtonText]}>{label}</Text>
+        </Pressable>
+      </View>
+    );
+  }
   else if (theme === 'primary') {
     return (
       <View

@@ -39,22 +39,30 @@ const listenToSupportUsers = (
   return unsubscribe;
 };
 
-const getAllUsers = async () => {
-  try {
-    const usersRef = collection(db, "Users");
-    const querySnapshot = await getDocs(usersRef);
+ const getAllUsers = async (): Promise<User[]> => {
+        try {
+            const usersRef = collection(db, "Users");
+            const querySnapshot = await getDocs(usersRef);
 
-    const users = querySnapshot.docs.map(doc => ({
-      userId: doc.id,
-      ...doc.data(),
-    }));
+            const users = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    userId: doc.id,
+                    email: data.email || "",
+                    fullName: data.fullName || "",
+                    department: data.departement || "",
+                    role: data.role || "",
+                    lastLogin: data.lastLogin || "",
+                    createdAt: data.createdAt || new Date().toISOString(),
+                } as User;
+            });
 
-    return users;
-  } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateurs:", error);
-    return [];
-  }
-};
+            return users;
+        } catch (error) {
+            console.error("Erreur lors de la récupération des utilisateurs:", error);
+            return [];
+        }
+    };
 
 
 

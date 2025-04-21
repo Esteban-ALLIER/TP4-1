@@ -19,6 +19,7 @@ import { getUserData, updateUser } from "@/services/user.service";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { User } from "@/types/user";
 import { useAuth } from "@/context/ctx";
+import { getAllUsers } from "@/services/user.service";
 import { DocumentReference, collection, getDocs } from "firebase/firestore";
 import { db } from "@/config/firebase";
 
@@ -33,30 +34,7 @@ const UserProfile = () => {
 
     if (!user) return <Redirect href="/login" />;
 
-    const getAllUsers = async (): Promise<User[]> => {
-        try {
-            const usersRef = collection(db, "Users");
-            const querySnapshot = await getDocs(usersRef);
-
-            const users = querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    userId: doc.id,
-                    email: data.email || "",
-                    fullName: data.fullName || "",
-                    department: data.departement || "",
-                    role: data.role || "",
-                    lastLogin: data.lastLogin || "",
-                    createdAt: data.createdAt || new Date().toISOString(),
-                } as User;
-            });
-
-            return users;
-        } catch (error) {
-            console.error("Erreur lors de la récupération des utilisateurs:", error);
-            return [];
-        }
-    };
+   
 
 
     const getUsers = async () => {

@@ -1,8 +1,8 @@
-import { notifyLocal } from "@/components/notification/localNotification";
+import { notifyLocalAssignation, notifyLocalEdit, notifyLocalTicket } from "@/components/notification/localNotification";
 import { db } from "@/config/firebase";
 import { TicketFirst, TicketTrue } from "@/types/ticket";
 import { dateOnly } from "@/utils/dateFormatter";
-import { collection, getDocs, addDoc, updateDoc, doc,getDoc, deleteDoc, Timestamp, onSnapshot, DocumentReference } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, doc, getDoc, deleteDoc, Timestamp, onSnapshot, DocumentReference } from "firebase/firestore";
 
 
 const getAllTickets = async (): Promise<TicketTrue[]> => {
@@ -10,50 +10,12 @@ const getAllTickets = async (): Promise<TicketTrue[]> => {
   const ticketsCollection = collection(db, "Tickets");
   const snapshot = await getDocs(ticketsCollection);
 
-
   return snapshot.docs.map((doc) => ({
     id: doc.id,
     ...(doc.data() as TicketTrue),
   }));
 };
 
-const listenToTickets = (
-  role: string,
-  userId: string,
-  setTickets: (tickets: TicketTrue[]) => void
-) => {
-  const ticketsCollection = collection(db, "Tickets");
-
-  const unsubscribe = onSnapshot(ticketsCollection, (snapshot) => {
-    const ticketList = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as TicketTrue),
-    }));
-
-    
-    let filtered = ticketList;
-
-    if (role === "employee") {
-      filtered = ticketList.filter(
-        (ticket) => (ticket.createdBy as DocumentReference).id === userId
-      );
-    } else if (role === "support") {
-      filtered = ticketList.filter(
-        (ticket) => (ticket.assignedTo as DocumentReference)?.id === userId
-      );
-    }
-    setTickets(filtered);
-  });
-
-  return unsubscribe;
-};
-
-async function getTicketsDB() {
-
-  const querySnapshot = await getDocs(collection(db, "Tickets"));
-  querySnapshot.forEach((doc) => {
-  });
-}
 
 
 const getDetailTicket = async (idTicket: string) => {
@@ -61,15 +23,12 @@ const getDetailTicket = async (idTicket: string) => {
     if (!idTicket || typeof idTicket !== "string") {
       throw new Error("ID du ticket invalide.");
     }
-
     const ticketRef = doc(db, "Tickets", idTicket);
     const docSnap = await getDoc(ticketRef);
-
     if (!docSnap.exists()) {
       console.log(`Aucun ticket trouvé pour l'ID : ${idTicket}`);
       return null;
     }
-
     return docSnap.data();
   } catch (error) {
     console.log("Erreur lors de la récupération du ticket :", error);
@@ -80,50 +39,48 @@ const getDetailTicket = async (idTicket: string) => {
 //Création de tickets
 const createTicket = async (ticket: TicketFirst): Promise<TicketTrue | null> => {
   try {
-    console.log("ticket envoyé :", ticket);
-  const ticketsCollection = collection(db, "Tickets");
-  if (!ticket.createdBy || typeof ticket.createdBy !== 'string') {
-    throw new Error("une erreur sur l'utilisateur");
+    const ticketsCollection = collection(db, "Tickets");
+    if (!ticket.createdBy || typeof ticket.createdBy !== 'string') {
+      throw new Error("une erreur sur l'utilisateur");
+    }
+    const userRef = doc(db, "Users", ticket.createdBy);
+    const ticketData: TicketFirst = {
+      title: ticket.title,
+      description: ticket.description,
+      status: ticket.status,
+      priority: ticket.priority,
+      category: ticket.category,
+      createdBy: userRef,
+      createdAt: Timestamp.fromDate(dateOnly),
+      updatedAt: Timestamp.fromDate(dateOnly),
+    };
+    if (ticket.location) {
+      ticketData.location = ticket.location;
+    }
+    if (ticket.dueDate) {
+      ticketData.dueDate = ticket.dueDate;
+    }
+    await addDoc(ticketsCollection, ticketData);
+    await notifyLocalTicket(ticketData.title)
+    return {
+      title: ticket.title,
+      description: ticket.description,
+      status: ticket.status,
+      priority: ticket.priority,
+      category: ticket.category,
+      createdBy: userRef,
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+    };
   }
-  
-  const userRef = doc(db, "Users", ticket.createdBy);
-  const ticketData: TicketFirst = {
-    title: ticket.title,
-    description: ticket.description,
-    status: "nouveau",
-    priority: ticket.priority,
-    category: ticket.category,
-    createdBy: userRef,
-    createdAt: Timestamp.fromDate(dateOnly),
-    updatedAt: Timestamp.fromDate(dateOnly),
-  };
-  if (ticket.location) {
-    ticketData.location = ticket.location;
-  }
-  console.log("TicketData avant ajout :", ticketData);
-  await addDoc(ticketsCollection, ticketData);
-  return {
-    title: ticket.title,
-    description: ticket.description,
-    status: ticket.status,
-    priority: ticket.priority,
-    category: ticket.category,
-    createdBy: userRef,
-    createdAt: Timestamp.fromDate(new Date()),
-    updatedAt: Timestamp.fromDate(new Date()),
-  };}
   catch (error) {
     console.error("Error creating ticket:", error);
-    return null; 
+    return null;
   }
 };
 
-
-
-const deleteTicket = async (idTicket:string) : Promise<boolean> => {
+const deleteTicket = async (idTicket: string): Promise<boolean> => {
   try {
-    console.log(idTicket)
-
     await deleteDoc(doc(db, "Tickets", idTicket));
     return true;
   } catch (error) {
@@ -162,15 +119,56 @@ const updateTicket = async (
     updatePayload.dueDate = updatedData.dueDate;
   }
 
+  await updateDoc(ticketRef, updatePayload);
+  await notifyLocalEdit(updatePayload.title);
+};
+
+const assignSupportToTicket = async (ticketId: string, supportUserId: string) => {
+  try {
+    const ticketRef = doc(db, "Tickets", ticketId);
+    const supportRef = doc(db, "Users", supportUserId);
+
+    await updateDoc(ticketRef, {
+      assignedTo: supportRef,
+      status: "assigné",
+    });
+
+    const ticketSnap = await getDoc(ticketRef);
+    if (ticketSnap.exists()) {
+      const ticketData = ticketSnap.data();
+      const title = ticketData.title || ticketId;
+      await notifyLocalAssignation(title);
+    }
+  } catch (error) {
+    console.error("Erreur lors de l’assignation du ticket :", error);
+  }
+};
+
+
+const closedTicket = async (
+  idTicket: string,
+): Promise<void> => {
+  if (!idTicket) throw new Error("ID du ticket manquant");
+
+  const ticketRef = doc(db, "Tickets", idTicket);
+  const now = new Date();
+  const dateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const updatePayload: any = {
+    status: "fermé",
+    updatedAt: Timestamp.fromDate(dateOnly),
+  };
 
   await updateDoc(ticketRef, updatePayload);
+  const ticketSnap = await getDoc(ticketRef);
+  if (ticketSnap.exists()) {
+    const ticketData = ticketSnap.data();
+    const title = ticketData.title;
+    await notifyLocalEdit(title);
+  }
 };
 
- const assignSupportToTicket = async (ticketId: string, supportUserId: string) => {
-  const ticketRef = doc(db, "Tickets", ticketId);
-  const supportRef = doc(db, "Users", supportUserId);
-  await updateDoc(ticketRef, { assignedTo: supportRef });
-  await notifyLocal(ticketId);
-};
 
-export { getAllTickets, getTicketsDB, createTicket, getDetailTicket,deleteTicket,updateTicket,assignSupportToTicket,listenToTickets };
+
+
+export { getAllTickets, createTicket, getDetailTicket, deleteTicket, updateTicket, assignSupportToTicket, closedTicket };

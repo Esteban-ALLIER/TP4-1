@@ -5,32 +5,8 @@ import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, ScrollView, StyleSheet } from "react-native";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { getAllUsers } from "@/services/user.service";
 import { User } from "@/types/user";
-
-const getAllUsers = async (): Promise<User[]> => {
-  try {
-    const usersRef = collection(db, "Users");
-    const querySnapshot = await getDocs(usersRef);
-
-    const users = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        userId: doc.id,
-        email: data.email || "",
-        fullName: data.fullName || "",
-        department: data.departement || "",
-        role: data.role || "",
-        lastLogin: data.lastLogin || "",
-        createdAt: data.createdAt || new Date().toISOString(),
-      } as User;
-    });
-
-    return users;
-  } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateurs:", error);
-    return [];
-  }
-};
 
 interface CommentData {
   id?: string;
@@ -82,11 +58,9 @@ const CommentsScreen = () => {
     if (!timestamp) return new Date(0); 
 
     try {
-      // Vérifier si toDate() existe (pour Firestore Timestamp)
       if (typeof timestamp.toDate === 'function') {
         return timestamp.toDate();
       }
-      // Sinon, essayer de traiter comme une date ou une chaîne
       else {
         return new Date(timestamp);
       }
@@ -101,12 +75,10 @@ const CommentsScreen = () => {
 
       const unsubscribeComments = listenToComments(idTicket, (data) => {
         
-        // Pour le débogage, afficher la structure du premier commentaire
         if (data.length > 0) {
         }
 
         const enhancedComments = data.map(comment => {
-          // Utiliser la bonne propriété pour l'ID utilisateur
           const userId = comment.userId?.id;
           const user = userId ? usersMap[userId] : null;
 
@@ -137,7 +109,6 @@ const CommentsScreen = () => {
           return dateB.getTime() - dateA.getTime(); // Ordre décroissant
         });
 
-        // Utiliser les commentaires triés, pas les non triés!
         setComments(sortedComments);
         setLoading(false);
         

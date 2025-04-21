@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, Alert, ActivityIndicator, StyleSheet, Button as RNButton, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
-import { getDetailTicket, deleteTicket, updateTicket } from "@/services/ticket.service";
+import { getDetailTicket, deleteTicket, updateTicket, closedTicket } from "@/services/ticket.service";
 import AddTicketForm from "@/components/tickets/TicketForm";
 import { TicketFirst } from "@/types/ticket";
 import { DocumentData, DocumentReference, getDoc } from "firebase/firestore";
@@ -10,7 +10,6 @@ import AddCommentModal from "@/components/comments/commentsForm";
 import { useAuth } from "@/context/ctx";
 import { addComment, listenToComments } from "@/services/comment.service";
 import { comments } from "@/types/comments";
-// import { sendPushNotification } from "@/services/pushNotifications"; 
 
 const TicketDetails = () => {
   const router = useRouter();
@@ -83,11 +82,22 @@ const TicketDetails = () => {
   }, [ticket?.assignedTo]);
 
   const goToCommentsScreen = () => router.push(`/tickets/${idTicket}/comments`);
-  const goToAssingationScreen = () => router.push(`/tickets/${idTicket}/assignation`);
+  const goToAssingationScreen = () => {
+    if (ticket?.status !== "fermé") {
+      router.push(`/tickets/${idTicket}/assignation`)
+    } else {
+      Alert.alert("Ticket fermé", "Le ticket est fermé")
+    }
+  }
   const goToTicketsIndex = () => router.replace("/tickets");
 
-  const handleEdit = () => setIsEditModalVisible(true);
-
+  const handleEdit = () => {
+    if (ticket?.status !== "fermé") {
+      setIsEditModalVisible(true);
+    } else {
+      Alert.alert("Ticket fermé", "Le ticket est fermé")
+    }
+  }
   const handleSaveEdit = async (updatedTicket: TicketFirst) => {
     if (!updatedTicket || !idTicket) return;
 
@@ -134,24 +144,54 @@ const TicketDetails = () => {
     );
   };
 
+  const handleCloseTicket = () => {
+    Alert.alert(
+      "Fermer le ticket",
+      "Voulez-vous vraiment fermer ce ticket ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Fermer",
+          style: "destructive",
+          onPress: async () => {
+            if (ticket) {
+              await closedTicket(idTicket);
+              setTicket({ ...ticket, status: "fermé" });
+              Alert.alert("Succès", "Le ticket a été fermé avec succès.");
+            }
+          },
+        },
+      ]
+    );
+  }
+  const openCommentModal = () => {
+    {
+      if (ticket?.status !== "fermé") {
+        setCommentModalVisible(true);
+      } else {
+        Alert.alert("Ticket fermé", "Le ticket est fermé")
+      }
+    }
+  }
+
   const handleAddComment = async (text: string) => {
     if (!user?.uid) {
       return Alert.alert("Erreur", "Utilisateur non connecté.");
     }
-
     try {
       await addComment({
         ticketId: idTicket,
         userId: user.uid,
         content: text,
       });
-      
+
       Alert.alert("Succès", "Commentaire ajouté");
     } catch (error) {
       console.error("Erreur lors de l'ajout du commentaire :", error);
       Alert.alert("Erreur", "Impossible d'ajouter le commentaire.");
     }
-  };
+  }
+
 
   const hasComments = comments.length > 0;
 
@@ -234,60 +274,74 @@ const TicketDetails = () => {
 
         {/* Actions principales */}
         <View style={styles.actionRow}>
-            <Button theme="edit" label="Modifier" onPress={handleEdit} />
-            <Button theme="delete" label="Supprimer" onPress={handleDelete} />
+          <Button theme="edit" label="Modifier" onPress={handleEdit} />
+          <Button theme="delete" label="Supprimer" onPress={handleDelete} />
         </View>
 
         {/* Actions secondaires */}
-        <View style={styles.secondaryActions}>
+        <View style={styles.actionRow}>
           {role === "admin" && (
-            <RNButton
-              title="Assigner le ticket"
+            <Button
+              theme="basique"
+              label="Assigner le ticket"
               onPress={goToAssingationScreen}
-              color="#0066CC"
-            />
-          )}
-
-          
-            <RNButton
-              title="Ajouter un commentaire"
-              onPress={() => setCommentModalVisible(true)}
-              color="#0066CC"
-            />
-          
-
-          {hasComments && (
-            <RNButton
-              title="Voir les commentaires"
-              onPress={goToCommentsScreen}
-              color="#0066CC"
             />
           )}
         </View>
-        <View style={styles.backButton}>
+
+        <View style={styles.actionRow}>
           <Button
+            theme="basique"
+            label="Ajouter un commentaire"
+            onPress={openCommentModal}
+          />
+        </View>
+
+        <View style={styles.actionRow}>
+          {hasComments && (
+            <Button
+              theme="see"
+              label="Voir les commentaires"
+              onPress={goToCommentsScreen}
+            />
+          )}
+        </View>
+        <View style={styles.actionRow}>
+          <Button
+            theme="close"
+            label="Fermé le ticket"
+            onPress={handleCloseTicket}
+          />
+        </View>
+        <View style={styles.actionRow}>
+          <Button
+            theme="return"
             label="Retour à la liste"
             onPress={goToTicketsIndex}
           />
         </View>
-      </ScrollView>
+      </ScrollView >
 
       {/* Modals */}
-      {commentModalVisible && (
-        <AddCommentModal
-          visible={commentModalVisible}
-          onClose={() => setCommentModalVisible(false)}
-          onSave={(text) => handleAddComment(text)}
-        />
-      )}
-      {isEditModalVisible && (
-        <AddTicketForm
-          visible={isEditModalVisible}
-          onClose={() => setIsEditModalVisible(false)}
-          onSave={handleSaveEdit}
-          initialTicket={ticket}
-        />
-      )}
+      {
+        commentModalVisible && (
+          <AddCommentModal
+            visible={commentModalVisible}
+            onClose={() => setCommentModalVisible(false)}
+            onSave={(text) => handleAddComment(text)}
+          />
+        )
+      }
+      {
+        isEditModalVisible && (
+          <AddTicketForm
+            visible={isEditModalVisible}
+            onClose={() => setIsEditModalVisible(false)}
+            onSave={handleSaveEdit}
+            initialTicket={ticket}
+          />
+        )
+      }
     </>
   );
 };
