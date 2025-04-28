@@ -1,4 +1,4 @@
-package com.esteban.ticketapp
+package com.estebaaaan.ap4
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

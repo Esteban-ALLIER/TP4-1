@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TP4",
-    "slug": "ticketapp",
+    "slug": "ap4",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.esteban.ticketapp"
+      "package": "com.estebaaaan.ap4"
     },
     "web": {
       "bundler": "metro",
@@ -50,9 +50,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "4968711b-731b-4dd0-b195-aa9dd7cf6a94"
+        "projectId": "6050f24b-8455-4e8e-87ab-21444af30543"
       }
     },
-    "owner": "esteban"
+    "owner": "estebaaaan"
   }
 }
