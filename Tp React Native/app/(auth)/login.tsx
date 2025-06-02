@@ -6,7 +6,7 @@ import { auth, db } from "@/config/firebase";
 import { Link, useRouter } from "expo-router";
 import Button from "@/components/ui/Button";
 import { doc, Timestamp, updateDoc } from "firebase/firestore";
-import { registerForPushNotificationsAsync } from "@/hooks/usePushNotification";
+// import { registerForPushNotificationsAsync } from "@/hooks/usePushNotification";
 
 const LoginScreen = () => {
   const router = useRouter();
