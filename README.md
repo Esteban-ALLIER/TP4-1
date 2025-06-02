@@ -1,4 +1,3 @@
-Suite à la récente mise à jour du SDK53, mon projet n'est plus fonctionnel. Je travaille actuellement dessus. Je m'excuse pour la gêne que cela cause
 
 
 About
